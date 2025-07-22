@@ -1,0 +1,243 @@
+<%@ page import="hkapps.shipment_tracking.*"%>
+<%@ page import="hkapps.event_extract.*"%>
+<%@ page import="com.hkapps.util.*"%>
+<%@ page import="java.util.*"%>
+<%@ page import="java.lang.*"%>
+<%@ page import="java.lang.reflect.Array"%>
+<%@ page import="java.net.*"%>
+<%@ page import="java.io.*" %>
+<%@ page import="org.json.*"%>
+<%
+response.setHeader("Content-Security-Policy",
+    "default-src 'self'; " +
+    "img-src 'self' https://apps.dhl.com.hk; " +
+    "script-src 'self' https://www.recaptcha.net https://www.gstatic.com; " +
+    "connect-src 'self' https://www.recaptcha.net https://www.gstatic.com; " +
+    "style-src 'self' 'unsafe-inline' https://www.recaptcha.net https://www.gstatic.com; " +
+    "frame-src https://www.recaptcha.net https://www.gstatic.com; " +
+    "object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; " +
+    "upgrade-insecure-requests; block-all-mixed-content;");
+%>
+<html>
+<head>
+<title>Shipment Tracking</title>
+<script src="../js_client_eng_hws/eng_st_FormCheck.js"></script>
+<script src="../js_client_eng_hws/eng_track.js"></script>
+</head>
+
+<%
+Common common = new Common();
+//out.println(request.getParameter("g-recaptcha-response"));
+if ((request.getParameter("g-recaptcha-response") == null) || (request.getParameter("g-recaptcha-response").equals(""))) {
+    response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+} else {
+    Curl curl = new Curl();
+    boolean chk_result = false;
+    Properties prop=new Properties();
+    FileInputStream ip=new FileInputStream(System.getProperty("catalina.base")+"/webapps/config.properties");
+    prop.load(ip);
+    //String captcha_secretKey = prop.getProperty("captcha_secretKey_v2");
+    String captcha_secretKey = prop.getProperty("captcha_secretKey_v3");
+    chk_result = curl.chk_captcha(captcha_secretKey, request.getParameter("g-recaptcha-response"));
+    if (!chk_result) {
+        response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+        if(true){return;}
+    }
+}
+
+String referpage = request.getHeader("referer");
+
+if (referpage == null) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+}
+
+URL referurl = new URL(referpage);
+if (!common.isValidProtocol(referurl.getProtocol(),request.getServerPort())) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+}
+
+
+if (!common.isValidHost(referurl.getHost())) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+}
+
+if (!referurl.getPath().equals("/eng_st/eng_track_home.html")) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+}
+
+
+if (request.getQueryString() != null) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+}
+
+
+if ((request.getParameter("awb") == null) || (request.getParameter("awb").equals("")) || (request.getParameter("awb").equals("undefined"))) {
+   //response.sendRedirect("err_htmls/tracking_err.html");
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;} 
+  //out.println(referpage); 
+} else {
+  
+  String tmpawb=request.getParameter("awb");
+  String[] awblist=tmpawb.split("\\|");
+  int nawb=Array.getLength(awblist);  
+  
+  if (nawb == 0) {
+   response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+   if(true){return;}
+  }
+ 
+  DataTypeUtil dtu = new DataTypeUtil();
+  
+  boolean chk_awb = true;
+  for (int p=0; p<nawb; p++) {
+	/*
+    if (awblist[p].length() != 10) {
+       chk_awb = false;
+       p=nawb;
+    } else {
+       if (!dtu.isNumeric(awblist[p])) {
+      	  chk_awb = false;
+          p=nawb;
+       }
+    } 
+	*/
+			
+	if (!dtu.isAwb(awblist[p])) {
+		chk_awb = false;
+        p=nawb;
+    }
+  }
+
+  if (!chk_awb) {
+    response.sendRedirect(common.convert_path(request.getServerPort(), (request.getRequestURL()).toString(), request.getServletPath(), "eng_track_home.html"));
+	if(true){return;}
+  }
+  
+  boolean awb_too_freq = false;
+  boolean too_freq = false;
+  String too_freq_awblist = "";  
+  boolean checked_freq = false;
+  
+  
+  Shipment_tracking ship_track = new Shipment_tracking();
+  
+  //System.out.println("awblist:" + awblist.toString());
+  
+   //if ((awblist != null) && (awblist != "")) {
+   if ((awblist != null) && (nawb > 0)) {
+   
+	  for (int n=0; n<nawb; n++) { 
+	      //shipdetail = ship_track.query(awblist[n],"");
+	        req_json.put("awbn", awblist[n]);
+		req_json.put("lang", "en");
+	  
+		connectAPI.send_request();
+	  
+		JSONObject res_json = connectAPI.get_response_json();
+	  
+		JSONObject res_json_awb;
+		JSONObject res_json_shp;
+		JSONArray res_jsonarr_result;
+		JSONObject res_json_result;
+		
+		res_json_awb = res_json.getJSONObject(awblist[n]);
+		res_json_shp = res_json_awb.getJSONObject("shp");
+		
+		res_jsonarr_result = res_json_shp.getJSONArray("Event");
+		
+		ShipDetail shipdetail = new ShipDetail();
+		
+		shipdetail.awb_no = awblist[n];
+                
+		if (res_jsonarr_result.length() > 0) { }
+      	myResultList.addElement(shipdetail);
+	
+      }
+      
+      //ShipDetail shipdetail;  
+      for (k=0; k<myResultList.size(); k++) {
+        ShipDetail shipdetail = (ShipDetail) myResultList.elementAt(k);
+    	
+        out.println("<tr>");
+	out.println("<p>");
+	
+	// First column : AWB Number
+	out.println("<td width=\"15%\" height=\"19\" valign=\"top\" align=\"left\">");
+        out.println("<font size=1 face=\"Frutiger, Arial\">");
+        out.println("<a href=\"#" + shipdetail.awb_no + "\">" + shipdetail.awb_no + "</a></td>");
+       
+	//out.println(shipdetail.orig + shipdetail.dest + shipdetail.accept_trace + shipdetail.ckpt);
+	
+	//if (shipdetail.ckpt == null) {
+	if ((shipdetail.ckpt == null) || (shipdetail.ckpt.size() == 0)) {
+	  // Second column : Origin Service Area (country - city)
+	
+	  out.println("<td width = \"15%\" height=\"19\" valign=top align=\"left\">");
+	  
+	  // Forth column : Status        
+	  out.println("<font size=1 face=\"Frutiger, Arial\">Please contact our 24 hours Customer Service hotline on 2400-3388 for arrangement.</td>");
+	  
+	  // Fifth column : Further Investigation
+	  out.println("<input type=\"hidden\" name=\"cb" + k + "\" value=\"NA\"></input>");
+	
+	} else {
+	  // Second column : Origin Service Area (country - city)
+	  
+	  // Third column : Dest. Service Area (country - city)
+
+	  out.println("<td width = \"15%\" height=\"19\" valign=top align=\"left\">");
+	  
+	  //Checkpoint lst_ckpt = (Checkpoint) shipdetail.ckpt.elementAt(0);
+	  Checkpoint lst_ckpt = (Checkpoint) shipdetail.ckpt.elementAt(shipdetail.ckpt.size()-1);
+	  
+	  // Forth column : Status
+          if (lst_ckpt.gen_cd.equals("OK"))
+   	  { }
+   	  else
+   	  { }
+   	    	 
+   	  // Fifth column : Further Investigation
+    	
+    	//if (shipdetail.accept_trace.equals("1")) {
+	  if (shipdetail.accept_trace.equals("Y")) {
+    	   have_ckpt_box = true;    	   
+    	  } else { }
+    	  
+	}
+	
+	out.println("</tr>");
+	
+      } // end for for loop
+
+      out.println("</table>");
+
+      if (have_ckpt_box) {
+      out.println("</form>");
+    	
+      for (k=0; k<myResultList.size(); k++) {
+	  }
+       }//End If 
+     }//End For Loop
+  
+  
+%>
+   
+<p align="center"><br>
+&nbsp; </p>
+
+</blockquote>
+</body>
+
+<%
+}
+}
+%>
+<SCRIPT LANGUAGE="javascript" SRC="../js_client/copyright_r.js"></SCRIPT>
+</html>

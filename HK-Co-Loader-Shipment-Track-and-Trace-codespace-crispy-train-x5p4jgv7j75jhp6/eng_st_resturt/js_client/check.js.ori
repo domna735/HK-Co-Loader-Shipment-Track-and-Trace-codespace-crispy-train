@@ -1,0 +1,473 @@
+// --------------------                                     
+// To initialize two variables as the page begin loaded     
+// which will be used to verify the type of browser         
+var isNav4, isIE4                                           
+isNav = false;                                              
+isIE4 = false;                                              
+if (parseInt(navigator.appVersion.charAt(0)) >= 4) {                
+  if (navigator.appName == "Netscape") {                    
+    isNav = true;                                           
+  } else if (navigator.appVersion.indexOf("MSIE") != -1) {  
+    isIE4 = true;                                           
+  }                                                         
+}                                                           
+
+
+function dhl_alert( theField, name, text, height )                              
+{                                                                               
+  if (!height) height = 200;                                                    
+                                                                                
+  if (isNav) {                                                                  
+    if (typeof(newWin) != "undefined" && !newWin.closed) newWin.close(); 
+    newWin=window.open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);    
+    newWin.focus(); 
+  } else if (isIE4) {                                                           
+    if (typeof(newWin) != "undefined" && !newWin.closed) newWin.close(); 
+    newWin=open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);
+    newWin.focus();                                                             
+  } else {                                                                      
+    // all browsers with version 3.x or below
+    newWin=window.open("", "dhl_alert", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=no,resizable=no,width=300,height=" + height);    
+    newWin.focus();                                    
+  }                                                                             
+                                                                                
+  newWin.document.write( "<HTML><HEAD><TITLE>"+ name +"</TITLE></HEAD>\n")
+
+
+  newWin.document.write( "<script language=\"JavaScript\"> \n <!-- \n")
+
+
+  newWin.document.write( "\nfunction private_MouseOver() \n")
+  newWin.document.write( "{\nif (document.images) { eval(\"document.\" + this.stImageName + \".src=\\\'\" + this.stOverImage + \"\\\'\");}\n}\n")
+
+  newWin.document.write( "\nfunction private_MouseOut() \n")
+  newWin.document.write( "{\nif (document.images) { eval(\"document.\" + this.stImageName + \".src=\\\'\" + this.stOutImage + \"\\\'\");}\n}\n")
+
+  newWin.document.write( "\n\nfunction objMouseChangeImg(stImageName, stOverImage, stOutImage) \n")
+  newWin.document.write( "{\nthis.stImageName = stImageName; \n this.stOverImage = stOverImage; \n this.stOutImage = stOutImage; \n")
+  newWin.document.write( " this.MouseOut = private_MouseOut; \n this.MouseOver = private_MouseOver; } \n ")
+
+  newWin.document.write( "\n\nobjPIC1 = new objMouseChangeImg('PIC1', \'../images/return2.gif\', \'../images/return1.gif\'); ")
+  
+  newWin.document.write( "\n // --> </script> \n")
+
+  //newWin.document.write("<BODY BGCOLOR=\"#FFFFFF\">\n" );                                                           
+  //newWin.document.write( "<TABLE CELLPADDING=6 WIDTH=\"100\%\" HEIGHT=\"100\%\" BORDER=0><TR><TD BGCOLOR=\"#951314\"><FONT FACE=\"arial,helvetica\" COLOR=\"#FFFFFF\" SIZE=\"+1\"><B>" + name +"</B></FONT></TD></TR>" );                          
+  //newWin.document.write( "<TR><TD><FONT FACE=\"arial,helvetica\" SIZE=2>"+ text +"</FONT></TD></TR>" );   
+  //newWin.document.write( "<TR><TD ALIGN=RIGHT><a href=\"javascript:window.close()\" onMouseOver=objPIC1.MouseOver() onMouseOut=objPIC1.MouseOut()><img src=../images/return1.gif border=0 name=PIC1></a></td></tr></TABLE>" );                                                                  
+  newWin.document.write("<BODY BGCOLOR=\"#FFFFFF\" TEXT=\"#000000\" topmargin=0 leftmargin=0 rightmargin=0 marginheight=0 marginwidth=0 SCROLL=NO>\n");
+  newWin.document.write("<table width=\"103\%\" border=0 CELLSPACING=0 CELLPADDING=0>");
+  newWin.document.write("<tr bgcolor=\"#FFCC00\"><td>&nbsp;</td></tr>");
+  newWin.document.write("<tr bgcolor=\"#CC0000\" valign=\"bottom\"><td height=\"45\">");
+  newWin.document.write("<table height=\"100\%\" width=\"100\%\" border=0>");
+  newWin.document.write("<tr valign=\"bottom\"><td width=\"2\%\">&nbsp;</td><td><font color=\"#FFFFFF\" size=\"+1\" face=\"Arial\"><b>"+name+"</b></font></td></tr>");
+  newWin.document.write("</table>");
+  newWin.document.write("</td></tr>");
+  newWin.document.write("<TR><TD>");
+  newWin.document.write("<table CELLPADDING=12 BORDER=0 WIDTH=100%>");
+  newWin.document.write("<tr><td><FONT FACE=\"Arial\" SIZE=2>"+ text +"</FONT></td></tr>");
+  newWin.document.write("<tr><TD ALIGN=RIGHT><form name=\"back\"><input type=button name=\"toReturn\" value=\"Return\" onClick=\"javascript:window.close()\"></form></TD></TR>");
+  newWin.document.write("</table>");
+  newWin.document.write("</TD></TR>");
+  newWin.document.write("</table>");
+  newWin.document.write( "</BODY></HTML>\n" );                                     
+  newWin.document.close();           
+                                  
+        //theField.focus();       
+        //theField.select();      
+                                  
+}               
+
+function isEmpty(s)                         
+{   return ((s == null) || (s.length == 0)) 
+}                                           
+         
+//
+// Show notice in a popup window if the product TDD is selected.
+// Nov 2002 by Nicole Choi
+
+function check_prod(f) {
+  	i=f.other.selectedIndex;
+  	prod=f.other.options[i].value;
+  	if (prod == "TDD") {
+  	    ad_Width      = 470;
+	    ad_Height     = 270;
+
+            options    = "scrollbars=no,resizable=no,menubar=no,status=no,toolbar=no,location=no,directories=no," + "width=" + ad_Width + ",height=" + ad_Height + ",left=100,top=100";
+    	    var remote=window.open('../TDD_Notice/eng_notice.html','popup',options);
+            remote.focus();
+	    return false;
+	}
+	return true;
+}
+
+function getSelectedRadio(buttonGroup) {
+    // returns the array number of the selected radio button or -1 if no button is selected
+    if (buttonGroup[0]) { // if the button group is an array (one button is not an array)
+       for (var i=0; i<buttonGroup.length; i++) {
+            if (buttonGroup[i].checked) {
+            return i
+            }
+       }
+    }
+}
+function getSelectedRadioValue(buttonGroup) {
+                             // returns the value of the selected radio button or "" if no button is selected
+                             var i = getSelectedRadio(buttonGroup);
+                             if (i == -1) {
+                                return "";
+                             } else {
+                                if (buttonGroup[i]) { // Make sure the button group is an array (not just one button)
+                                   return buttonGroup[i].value;
+                                } else { // The button group is just the one button, and it is checked
+                                   return buttonGroup.value;
+                                }
+                             }
+ } // Ends the "getSelectedRadioValue" function         
+
+
+function isAlphaNum (s) {
+    //var whitespace = " \t\n\r";
+    var whitespace = " \n\r";
+    
+    for (i = 0; i < s.length; i++)
+    {   
+        var c = s.charAt(i);
+        
+        if (!(isAlphabetic(c) || isDigit(c))) {
+            if ((!isValidSymbol(c)) && (whitespace.indexOf(c) == -1)) {
+        	return false;
+            }
+        }    	
+    }
+    return true;
+}
+
+function isAlphaNum_acno (s) {
+    //var whitespace = " \t\n\r";
+    var whitespace = " \n\r";
+    
+    for (i = 0; i < s.length; i++)
+    {   
+        var c = s.charAt(i);
+        
+        if (!(isAlphabetic(c) || isDigit(c))) {
+            //if ((!isValidSymbol(c)) && (whitespace.indexOf(c) == -1)) {
+        	return false;
+            //}
+        }    	
+    }
+    return true;
+}
+
+function isDigit (c)
+{   return ((c >= "0") && (c <= "9"))
+}
+
+function isAlphabetic(str) {
+	if (str.match(/^[a-zA-Z]+$/)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function isValidSymbol (s)
+{   
+    var i;
+    //var Symbol = "`~!@#$%^&*()_-+={}|[]:;'<>?,./\\\"";
+	var Symbol = "`~!@#^&()_-+{}[]:',./";
+    //var InvalidSymbol = "$%*=;<>?\\\"";
+	
+    if (Symbol.indexOf(s) != -1) return true;
+    
+    return false;
+}
+
+function isInteger (s)
+
+{   var i;
+
+    if (isEmpty(s)) 
+       if (isInteger.arguments.length == 1) return defaultEmptyOK;
+       else return (isInteger.arguments[1] == true);
+    
+
+    // Search through string's characters one by one
+    // until we find a non-numeric character.
+    // When we do, return false; if we don't, return true.
+
+    for (i = 0; i < s.length; i++)
+    {   
+        // Check that current character is number.
+        var c = s.charAt(i);
+
+        if (!isDigit(c)) return false;
+    }
+
+    // All characters are numbers.
+    return true;
+}
+
+function isPosNumber(inputVal) {
+  oneDecimal = false;
+  inputStr = inputVal.toString();
+  for (var i = 0; i < inputStr.length; i++) {
+    var oneChar = inputStr.charAt(i);
+    if (oneChar == "." && !oneDecimal) {
+	oneDecimal = true;
+	continue;
+    }
+    if (oneChar < "0" || oneChar > "9") return false;  
+  }
+  return true;
+}
+
+function checkEmpty(theField)
+{
+    v = theField.value;
+    while(''+v.charAt(0)==' ')v=v.substring(1,v.length);
+    while(v.charAt(v.length-1)+''==' ')v=v.substring(0,v.length-1);
+
+    if ((v=='.') || (v==',') || (v=='')) return false;
+    else return true;
+}
+
+function check_receiver_info(form) {
+    	
+   
+    	if (!checkEmpty(form.re_cust_cd)) {
+                form.re_cust_cd.focus()
+                form.re_cust_cd.select()
+		dhl_alert("useless", "The customer code is missing", "Please enter the customer code.", 180)
+                return false;
+        }
+        
+        else if (!(isAlphaNum(form.re_cust_cd.value))) {
+	    	form.re_cust_cd.focus()
+		form.re_cust_cd.select()
+		dhl_alert("useless", "The customer code is invalid", "Please enter the customer code in English.", 180 )
+		return false;
+	}
+	
+	else if (!checkEmpty(form.re_name)) {
+                form.re_name.focus()
+                form.re_name.select()
+		dhl_alert("useless", "The receiver company name is missing", "Please enter the receiver company name.", 180)
+                return false;
+        }
+        
+        else if ((!(isAlphaNum(form.re_name.value))) && (form.re_name.value.length > 25)) {
+        	form.re_name.focus()
+		form.re_name.select()
+		dhl_alert("useless", "The receiver company name is invalid", "If you enter receiver company name in Chinese, please enter no longer than 25 characters limit.", 180 )
+		return false;
+	}
+	
+    
+        else if (!checkEmpty(form.re_add1)) {
+                form.re_add1.focus()
+                form.re_add1.select()
+		dhl_alert("useless", "The delivery address on line 1 is missing", "Please start entry of delivery address on line 1.", 180)
+                return false;
+        }
+        else if ((!(isAlphaNum(form.re_add1.value))) && (form.re_add1.value.length > 25)) {
+        	form.re_add1.focus()
+		form.re_add1.select()
+		dhl_alert("useless", "The delivery address on line 1 is invalid", "If you enter delivery address on line 1 in Chinese, please enter no longer than 25 characters limit.", 180 )
+		return false;
+	}
+	else if ((checkEmpty(form.re_add2)) && (!(isAlphaNum(form.re_add2.value))) && (form.re_add2.value.length > 25)) {
+        	form.re_add2.focus()
+		form.re_add2.select()
+		dhl_alert("useless", "The delivery address on line 2 is invalid", "If you enter delivery address on line 2 in Chinese, please enter no longer than 25 characters limit.", 180 )
+		return false;
+	}
+	else if ((checkEmpty(form.re_add3)) && (!(isAlphaNum(form.re_add3.value))) && (form.re_add3.value.length > 25)) {
+        	form.re_add3.focus()
+		form.re_add3.select()
+		dhl_alert("useless", "The delivery address on line 3 is invalid", "If you enter delivery address on line 3 in Chinese, please enter no longer than 25 characters limit.", 180 )
+		return false;
+	}
+	else if (!(isAlphaNum(form.re_zip.value))) {
+	    	form.re_zip.focus()
+		form.re_zip.select()
+		dhl_alert("useless", "The postcode is invalid", "Please enter a valid postcode.", 180 )
+		return false;
+	}
+	else if (!checkEmpty(form.re_contact)) {
+                form.re_contact.focus()
+                form.re_contact.select()
+		dhl_alert("useless", "The name of the contact person is missing", "Please enter the name of the contact person.", 180)
+                return false;
+        }
+    	else if ((!(isAlphaNum(form.re_contact.value))) && (form.re_contact.value.length > 25)) {
+        	form.re_contact.focus()
+		form.re_contact.select()
+		dhl_alert("useless", "The name of the contact person is invalid", "If you enter name of the contact person in Chinese, please enter no longer than 25 characters limit.", 180 )
+		return false;
+	}
+	else if ((form.re_tel!=undefined) && (!checkEmpty(form.re_tel))) {
+                form.re_tel.focus()
+                form.re_tel.select()
+		dhl_alert("useless", "Receiver Phone/Fax/Email is missing", "Please enter the Receiver Phone/Fax/Email.", 180)
+                return false;
+        }
+        else if ((form.re_tel!=undefined) && (!isAlphaNum(form.re_tel.value))) {
+                form.re_tel.focus()
+                form.re_tel.select()
+		dhl_alert("useless", "Receiver Phone/Fax/Email is invalid", "Please enter a valid Receiver Phone/Fax/Email.", 180)
+                return false;
+        }
+
+  	return true;
+}
+
+//replace "#", ";" and "&" in order to make it works on an URL like ...pl?var1=value1&var2=value
+function replace_spec_char (str) {
+
+    var my_string = str;
+    
+    while((my_string.indexOf("#") != -1)){
+    	my_string = my_string.replace("#", "%23");    
+    }
+    while((my_string.indexOf(";") != -1)){
+    	my_string = my_string.replace(";", "%3B");    
+    }
+    while((my_string.indexOf("&") != -1)){
+    	my_string = my_string.replace("&", "%26");    
+    }
+    
+    while((my_string.indexOf("@") != -1)){
+    	my_string = my_string.replace("@", "%40");
+    }
+    
+    return my_string;	
+
+}
+
+function replace_space (str) {
+
+    var my_string = str;
+    
+    while((my_string.indexOf(" ") != -1)){
+    	my_string = my_string.replace(" ", "%20");    
+    }
+    
+    return my_string;	
+
+}
+
+	
+
+function isValidSymbol_4_Email (s) {   
+    var i;
+    var Symbol = "@.-_&";
+    
+    if (Symbol.indexOf(s) != -1) return true;
+    
+    return false;
+}
+
+var whitespace = " \t\n\r";
+
+function isWhitespace (s)
+
+{   var i;
+
+    // Is s empty?
+    if (isEmpty(s)) return true;
+
+    // Search through string's characters one by one
+    // until we find a non-whitespace character.
+    // When we do, return false; if we don't, return true.
+
+    for (i = 0; i < s.length; i++)
+    {   
+        // Check that current character isn't whitespace.
+        var c = s.charAt(i);
+	
+        if (whitespace.indexOf(c) == -1) return false;
+    }
+
+    // All characters are whitespace.
+    return true;
+}
+
+function isAlphaNumeric_ValidSymbol_4_Email (s) {
+    for (i = 0; i < s.length; i++)
+    {   
+        var c = s.charAt(i);
+        
+        if (!(isAlphabetic(c) || isDigit(c))) {
+            if ((!isValidSymbol_4_Email(c)) || (whitespace.indexOf(c) != -1)) {
+        	return false;
+            }
+        }    	
+    }
+    return true;
+}
+
+function isEmail (s)
+{   if (isEmpty(s)) 
+       if (isEmail.arguments.length == 1) return defaultEmptyOK;
+       else return (isEmail.arguments[1] == true);
+   
+    // is s whitespace?
+    if (isWhitespace(s)) return false;
+    
+    //if (containInvalidSymbol_4_Email(s)) return false;
+    if (!isAlphaNumeric_ValidSymbol_4_Email(s)) return false;
+    
+    // there must be >= 1 character before @, so we
+    // start looking at character position 1 
+    // (i.e. second character)
+    var i = 1;
+    var sLength = s.length;
+
+    // look for @
+    while ((i < sLength) && (s.charAt(i) != "@"))
+    { i++
+    }
+
+    if ((i >= sLength) || (s.charAt(i) != "@")) return false;
+    else i += 2;
+
+    // look for .
+    while ((i < sLength) && (s.charAt(i) != "."))
+    { i++
+    }
+
+    // there must be at least one character after the .
+    if ((i >= sLength - 1) || (s.charAt(i) != ".")) return false;
+    else return true;
+}
+
+function containInvalidSymbol_Phone (s)
+{
+		var i;
+		var InvalidSymbol = "`~!@#$%^&*_={}|[]:;'<>?,.\\\"";
+		//allow +-() /
+		
+		for (i = 0; i < s.length; i++)
+		{   
+			var c = s.charAt(i);
+			if (InvalidSymbol.indexOf(c) != -1) return true;
+		}
+		// All characters do not contain invalid symbol.
+		return false;
+}
+
+function isValidPhone (s) {
+	for (i = 0; i < s.length; i++) {
+	    var c = s.charAt(i);
+	    //if (isDigit(c) || isAlphabetic(c) || c == "+" || c == "-" || c == "_" || c == "(" || c == ")" || c == "{" || c == "}" || c == "[" || c == "]"  || c == "\\" || c == "/" || c == "#") {	        
+	    if (!isDigit(c)) {
+			if ((isAlphabetic(c)) || (containInvalidSymbol_Phone(c))) {
+			   return false;
+			}
+	    }
+	}
+
+	return true;
+}
